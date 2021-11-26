@@ -914,7 +914,7 @@ index(index_actor::stateful_pointer<index_state> self,
       VAST_DEBUG("{} adds flush listener", *self);
       self->state.add_flush_listener(std::move(listener));
     },
-    [self](vast::query query) -> caf::result<query_cursor> {
+    [self](atom::evaluate, vast::query query) -> caf::result<query_cursor> {
       if (!self->state.accept_queries) {
         VAST_VERBOSE("{} delays query {} because it is still starting up",
                      *self, query);
@@ -929,6 +929,9 @@ index(index_actor::stateful_pointer<index_state> self,
       auto rp = self->make_response_promise<query_cursor>();
       self->state.backlog.emplace(std::move(query), rp);
       return rp;
+    },
+    [self](atom::resolve, vast::expression expr) -> caf::result<meta_index_result> {
+      return self->delegate(self->state.meta_index, atom::candidates_v, expr, vast::ids{});
     },
     [self](atom::internal, vast::query query,
            query_supervisor_actor worker) -> caf::result<query_cursor> {
@@ -971,7 +974,8 @@ index(index_actor::stateful_pointer<index_state> self,
                   query)
         .then(
           [=, candidates = std::move(candidates)](
-            std::vector<uuid> midx_candidates) mutable {
+            meta_index_result& midx_result) mutable {
+            auto& midx_candidates = midx_result.partitions;
             VAST_DEBUG("{} got initial candidates {} and from meta-index {}",
                        *self, candidates, midx_candidates);
             candidates.insert(candidates.end(), midx_candidates.begin(),

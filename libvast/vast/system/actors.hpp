@@ -195,6 +195,31 @@ using query_supervisor_master_actor = typed_actor_fwd<
   // Enlist the QUERY SUPERVISOR as an available worker.
   caf::reacts_to<atom::worker, query_supervisor_actor>>::unwrap;
 
+
+// struct partition_update;
+
+
+// struct partition_update {
+//   struct create {
+//     uuid id;
+//   };
+//
+//   struct update {
+//     uuid old_id;
+//     uuid new_id;
+//   };
+//
+//   struct erase {
+//     uuid id;
+//   };
+//
+//   std::variant<create, update, erase> update;
+// };
+//
+// using meta_index_listener_actor = typed_actor_fwd<
+//   caf::reacts_to<atom::update, partition_update>
+//   >;
+
 /// The META INDEX actor interface.
 using meta_index_actor = typed_actor_fwd<
   // Bulk import a set of partition synopses.
@@ -209,7 +234,7 @@ using meta_index_actor = typed_actor_fwd<
   caf::replies_to<atom::replace, uuid, uuid,
                   std::shared_ptr<partition_synopsis>>::with<atom::ok>,
   // Return the candidate partitions for a query.
-  caf::replies_to<atom::candidates, vast::query>::with<std::vector<vast::uuid>>>
+  caf::replies_to<atom::candidates, vast::query>::with<meta_index_result>>
   // Conform to the procotol of the STATUS CLIENT actor.
   ::extend_with<status_client_actor>::unwrap;
 
@@ -249,8 +274,12 @@ using index_actor = typed_actor_fwd<
   caf::reacts_to<atom::telemetry>,
   // Subscribes a FLUSH LISTENER to the INDEX.
   caf::reacts_to<atom::subscribe, atom::flush, flush_listener_actor>,
-  // Evaluates a query.
-  caf::replies_to<query>::with<query_cursor>,
+  // Evaluates a query, ie. sends matching events to the caller.
+  caf::reacts_to<atom::evaluate, query>::with<query_cursor>,
+  // Resolves a query to its candidate partitions.
+  // TODO: Expose the meta index as a system component so this
+  // handler can go directly to the meta index.
+  caf::replies_to<atom::resolve, expression>::with<meta_index_result>,
   // Queries PARTITION actors for a given query id.
   caf::reacts_to<uuid, uint32_t>,
   // INTERNAL: The actual query evaluation handler. Does the meta index lookup,
