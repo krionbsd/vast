@@ -55,7 +55,7 @@ query_processor::~query_processor() = default;
 
 void query_processor::start(vast::query query, index_actor index) {
   index_ = std::move(index);
-  self_->send(index_, std::move(query));
+  self_->send(index_, atom::evaluate_v, std::move(query));
   transition_to(await_query_id);
 }
 

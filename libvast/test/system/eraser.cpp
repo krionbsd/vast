@@ -90,7 +90,10 @@ mock_index(system::index_actor::stateful_pointer<mock_index_state> self) {
     [=](atom::importer, system::idspace_distributor_actor) {
       FAIL("no mock implementation available");
     },
-    [=](vast::query&) -> caf::result<system::query_cursor> {
+    [=](atom::resolve, vast::expression) -> system::meta_index_result {
+      FAIL("no mock implementation available");
+    },
+    [=](atom::evaluate, vast::query&) -> caf::result<system::query_cursor> {
       auto query_id = unbox(to<uuid>(uuid_str));
       self->state.client = caf::actor_cast<caf::actor>(self->current_sender());
       self->send(self, query_id, 3u);
