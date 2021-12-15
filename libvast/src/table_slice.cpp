@@ -380,6 +380,14 @@ std::shared_ptr<arrow::RecordBatch> as_record_batch(const table_slice& slice) {
       //                 == table_slice_encoding::arrow) { ... }
       if constexpr (std::decay_t<decltype(*state(encoded, slice.state_))>::encoding
                     == table_slice_encoding::arrow) {
+        // If we have a record batch, but it is from an older table slice
+        // encoding, we must still rebuild the table slice. Otherwise, creating
+        // a new table slice from the returned record batch leads to undefined
+        // behavior.
+        if (!state(encoded, slice.state_)->is_latest_version) {
+          auto copy = rebuild(slice, table_slice_encoding::arrow);
+          return as_record_batch(copy);
+        }
         // Get the record batch first, then create a copy that shares the
         // lifetime with the chunk and the original record batch. Capturing the
         // chunk guarantees that the table slice is valid as long as the
