@@ -931,7 +931,8 @@ index(index_actor::stateful_pointer<index_state> self,
       return rp;
     },
     [self](atom::resolve, vast::expression expr) -> caf::result<meta_index_result> {
-      return self->delegate(self->state.meta_index, atom::candidates_v, expr, vast::ids{});
+      auto query = query::make_erase(expr);
+      return self->delegate(self->state.meta_index, atom::candidates_v, std::move(query));
     },
     [self](atom::internal, vast::query query,
            query_supervisor_actor worker) -> caf::result<query_cursor> {

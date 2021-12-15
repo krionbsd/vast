@@ -406,8 +406,8 @@ meta_index(meta_index_actor::stateful_pointer<meta_index_state> self,
       return atom::ok_v;
     },
     [=](atom::candidates,
-        const vast::ids& ids) -> caf::result<meta_index_result> {
-      VAST_TRACE_SCOPE("{} {} {}", *self, VAST_ARG(expression), VAST_ARG(ids));
+        const vast::query& query) -> caf::result<meta_index_result> {
+      VAST_TRACE_SCOPE("{} {} {}", *self, VAST_ARG(query));
       std::vector<vast::uuid> expression_candidates;
       std::vector<vast::uuid> ids_candidates;
       bool has_expression = query.expr != vast::expression{};

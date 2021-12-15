@@ -13,6 +13,7 @@
 #include "vast/ids.hpp"
 #include "vast/logger.hpp"
 #include "vast/system/query_cursor.hpp"
+#include "vast/system/meta_index.hpp"
 
 #include <caf/event_based_actor.hpp>
 #include <caf/skip.hpp>

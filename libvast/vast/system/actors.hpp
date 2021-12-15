@@ -275,7 +275,7 @@ using index_actor = typed_actor_fwd<
   // Subscribes a FLUSH LISTENER to the INDEX.
   caf::reacts_to<atom::subscribe, atom::flush, flush_listener_actor>,
   // Evaluates a query, ie. sends matching events to the caller.
-  caf::reacts_to<atom::evaluate, query>::with<query_cursor>,
+  caf::replies_to<atom::evaluate, query>::with<query_cursor>,
   // Resolves a query to its candidate partitions.
   // TODO: Expose the meta index as a system component so this
   // handler can go directly to the meta index.
