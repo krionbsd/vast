@@ -18,6 +18,7 @@
 #include "vast/transform_steps/hash.hpp"
 #include "vast/transform_steps/project.hpp"
 #include "vast/transform_steps/replace.hpp"
+#include "vast/transform_steps/select.hpp"
 #include "vast/uuid.hpp"
 
 using namespace std::literals;
@@ -148,6 +149,15 @@ TEST(replace step) {
   CHECK_EQUAL(caf::get<vast::record_type>(replaced->layout()).field(0).name,
               "uid");
   CHECK_EQUAL((*replaced).at(0, 0), vast::data_view{"xxx"sv});
+}
+
+TEST(select step) {
+  auto slice = make_transforms_testdata(vast::table_slice_encoding::msgpack);
+  vast::select_step select_step("index==2");
+  auto selected = select_step.apply(vast::table_slice{slice});
+  REQUIRE_NOERROR(selected);
+  // FIXME Check result!
+  // FIXME Tests for empty slice, no change, multiple rows
 }
 
 TEST(anonymize step) {
